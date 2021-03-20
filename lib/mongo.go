@@ -12,27 +12,29 @@ import (
 )
 
 type (
-
 	//CollectionAPI collection interface
 	CollectionAPI interface {
 		InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
+		Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, error)
+		FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
+		UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+		DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	}
 )
 
-// initialize connection to mongoDB
-func Initialize() (*mongo.Client, *mongo.Database, *mongo.Collection) {
+func GetConnection() (*mongo.Client, *mongo.Database, *mongo.Collection) {
 	var cfg config.Properties
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		log.Fatalf("Configuration cannot be read: %+v", err)
 	}
 
 	connectURI := fmt.Sprintf("mongodb://%s:%s", cfg.DBHost, cfg.DBPort)
-	c, err := mongo.Connect(context.Background(), options.Client().ApplyURI(connectURI))
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(connectURI))
 	if err != nil {
 		log.Fatalf("Unable to connect to mongoDB: %+v", err)
 	}
 
-	db := c.Database(cfg.DBName)
-	col := db.Collection(cfg.CollectionName)
-	return c, db, col
+	db := client.Database(cfg.DBName)
+	collection := db.Collection(cfg.CollectionName)
+	return client, db, collection
 }

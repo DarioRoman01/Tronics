@@ -13,12 +13,14 @@ import (
 )
 
 var (
-	cfg config.Properties
-	col *mongo.Collection
+	client     *mongo.Client
+	db         *mongo.Database
+	collection *mongo.Collection
+	cfg        config.Properties
 )
 
 func init() {
-	_, _, col = lib.Initialize()
+	client, db, collection = lib.GetConnection()
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		log.Fatalf("Unable to load configuration: %+v", err)
 	}
@@ -26,8 +28,14 @@ func init() {
 
 func main() {
 	e := echo.New()
-	h := &handlers.ProductHandler{Col: col}
+
+	h := &handlers.ProductHandler{Col: collection}
+	e.GET("/products/:id", h.GetProduct)
+	e.GET("/products", h.GetProducts)
 	e.POST("/products", h.CreateProducts)
+	e.PUT("/products/:id", h.UpdateProduct)
+	e.DELETE("/products/:id", h.DeleteProduct)
+
 	e.Logger.Info("Listening on port %s:%s", cfg.Host, cfg.Port)
 	e.Logger.Fatal(e.Start(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)))
 }
