@@ -18,6 +18,7 @@ Products dao stands for products Data Access Object the goal of this functions i
 communicate the db with the handlers and separete the logic of the db from the handlers
 */
 
+// retrieve all products and allows filtering
 func findProducts(ctx context.Context, q url.Values, collection lib.CollectionAPI) ([]Product, *echo.HTTPError) {
 	var products []Product
 
@@ -46,6 +47,7 @@ func findProducts(ctx context.Context, q url.Values, collection lib.CollectionAP
 	return products, nil
 }
 
+// retrieve product by id if exist
 func findProduct(ctx context.Context, id string, collection lib.CollectionAPI) (Product, *echo.HTTPError) {
 	var product Product
 
@@ -62,6 +64,7 @@ func findProduct(ctx context.Context, id string, collection lib.CollectionAPI) (
 	return product, nil
 }
 
+// Handle products creation and allow to insert many products in one request
 func insertProducts(ctx context.Context, products []Product, collection lib.CollectionAPI) ([]interface{}, *echo.HTTPError) {
 	var insertedIDS []interface{}
 
@@ -76,6 +79,7 @@ func insertProducts(ctx context.Context, products []Product, collection lib.Coll
 	return insertedIDS, nil
 }
 
+// Handle updating products in the db
 func updateProduct(ctx context.Context, id string, reqBody io.ReadCloser, collection lib.CollectionAPI) (Product, *echo.HTTPError) {
 	var updatedProduct Product
 
@@ -106,6 +110,7 @@ func updateProduct(ctx context.Context, id string, reqBody io.ReadCloser, collec
 	return updatedProduct, nil
 }
 
+// Delete product from db if exist
 func deleteProduct(ctx context.Context, id string, collection lib.CollectionAPI) (int64, *echo.HTTPError) {
 	docID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {

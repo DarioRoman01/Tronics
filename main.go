@@ -41,6 +41,7 @@ func main() {
 	ph := &handlers.ProductHandler{Col: prodscol}
 	uh := &handlers.UserHandler{Col: userscol}
 
+	// define endpoints
 	e.GET("/products/:id", ph.GetProduct)
 	e.GET("/products", ph.GetProducts)
 	e.POST("/products", ph.CreateProducts, middleware.BodyLimit("1M"))
@@ -49,6 +50,7 @@ func main() {
 
 	e.POST("/users/signup", uh.CreateUser)
 
+	// start the server
 	e.Logger.Info("Listening on port %s:%s", cfg.Host, cfg.Port)
 	e.Logger.Fatal(e.Start(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)))
 }
