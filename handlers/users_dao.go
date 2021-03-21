@@ -12,6 +12,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// compare passwords to verify credentials
+func isValidCredential(givenpwd, storepwd string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(storepwd), []byte(givenpwd)); err != nil {
+		return false
+	}
+
+	return true
+}
+
 // insertUser handle users creation in the db and validation of unique fields
 func insertUser(ctx context.Context, user User, collection lib.CollectionAPI) (interface{}, *echo.HTTPError) {
 	var newUser User
@@ -38,11 +47,31 @@ func insertUser(ctx context.Context, user User, collection lib.CollectionAPI) (i
 	id := primitive.NewObjectID()
 	user.ID = id
 
-	// insert user into the db
+	// insert user into the db if err means that a unique index already exist
 	res, err := collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "username or email already in use")
 	}
 
 	return res, nil
+}
+
+func loginUser(ctx context.Context, reqUser User, collection lib.CollectionAPI) (interface{}, *echo.HTTPError) {
+	var user User
+
+	result := collection.FindOne(ctx, bson.M{"username": reqUser.Username})
+	err := result.Decode(&user)
+	if err != nil && err != mongo.ErrNoDocuments {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Unable to parse request user")
+	}
+
+	if err == mongo.ErrNoDocuments {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
+	}
+
+	if !isValidCredential(reqUser.Password, user.Password) {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid credentials")
+	}
+
+	return user.Username, nil
 }

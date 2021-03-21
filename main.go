@@ -41,14 +41,16 @@ func main() {
 	ph := &handlers.ProductHandler{Col: prodscol}
 	uh := &handlers.UserHandler{Col: userscol}
 
-	// define endpoints
+	// products endpoints
 	e.GET("/products/:id", ph.GetProduct)
 	e.GET("/products", ph.GetProducts)
 	e.POST("/products", ph.CreateProducts, middleware.BodyLimit("1M"))
 	e.PUT("/products/:id", ph.UpdateProduct, middleware.BodyLimit("1M"))
 	e.DELETE("/products/:id", ph.DeleteProduct)
 
+	// users endpoints
 	e.POST("/users/signup", uh.CreateUser)
+	e.POST("/users/login", uh.LoginUser)
 
 	// start the server
 	e.Logger.Info("Listening on port %s:%s", cfg.Host, cfg.Port)
