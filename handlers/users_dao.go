@@ -56,22 +56,25 @@ func insertUser(ctx context.Context, user User, collection lib.CollectionAPI) (i
 	return res, nil
 }
 
-func loginUser(ctx context.Context, reqUser User, collection lib.CollectionAPI) (interface{}, *echo.HTTPError) {
+// Handle users authentication
+func loginUser(ctx context.Context, reqUser User, collection lib.CollectionAPI) (User, *echo.HTTPError) {
 	var user User
 
+	// check if user exist
 	result := collection.FindOne(ctx, bson.M{"username": reqUser.Username})
 	err := result.Decode(&user)
 	if err != nil && err != mongo.ErrNoDocuments {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "Unable to parse request user")
+		return user, echo.NewHTTPError(http.StatusBadRequest, "Unable to parse request user")
 	}
 
 	if err == mongo.ErrNoDocuments {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
+		return user, echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
 	}
 
+	// validate credentials
 	if !isValidCredential(reqUser.Password, user.Password) {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid credentials")
+		return user, echo.NewHTTPError(http.StatusBadRequest, "Invalid credentials")
 	}
 
-	return user.Username, nil
+	return user, nil
 }

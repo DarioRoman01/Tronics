@@ -39,7 +39,7 @@ func (u User) createToken() (string, error) {
 	claims["user_id"] = u.Username
 
 	// set secret
-	claims["exp"] = time.Now().Add(time.Minute * 90).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 90).UTC()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := at.SignedString([]byte(prop.JwtTokenSecret))
 	if err != nil {
@@ -87,12 +87,12 @@ func (u *UserHandler) LoginUser(c echo.Context) error {
 	}
 
 	// generate token
-	token, jwterr := user.createToken()
+	token, jwterr := logUser.createToken()
 	if jwterr != nil {
 		return c.JSON(http.StatusInternalServerError, "Unable to create token")
 	}
 
 	// add token to the response
-	c.Response().Header().Set("x-auth-token", token)
-	return c.JSON(http.StatusOK, logUser)
+	c.Response().Header().Set("x-auth-token", "Bearer "+token)
+	return c.JSON(http.StatusOK, logUser.Username)
 }
