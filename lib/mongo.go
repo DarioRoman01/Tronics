@@ -22,7 +22,7 @@ type CollectionAPI interface {
 }
 
 // GetConnection connect to the db and retrieve all the needed data
-func GetConnection() (*mongo.Client, *mongo.Database, *mongo.Collection, *mongo.Collection) {
+func GetConnection() (*mongo.Collection, *mongo.Collection) {
 	// read env variables
 	var cfg config.Properties
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
@@ -64,5 +64,5 @@ func GetConnection() (*mongo.Client, *mongo.Database, *mongo.Collection, *mongo.
 		log.Fatalf("Unable to create index: %+v", err)
 	}
 
-	return client, db, UsersCollection, ProductsCollection
+	return UsersCollection, ProductsCollection
 }

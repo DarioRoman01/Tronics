@@ -15,15 +15,13 @@ import (
 )
 
 var (
-	client   *mongo.Client
-	db       *mongo.Database
 	userscol *mongo.Collection
 	prodscol *mongo.Collection
 	cfg      config.Properties
 )
 
 func init() {
-	client, db, userscol, prodscol = lib.GetConnection()
+	userscol, prodscol = lib.GetConnection()
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		log.Fatalf("Unable to load configuration: %+v", err)
 	}
