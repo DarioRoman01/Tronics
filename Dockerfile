@@ -49,7 +49,7 @@ ENV JWT_SECRET=${JWT_SECRET}
 COPY --from=builder /build/main /
 
 # expose the port to run the application on
-EXPOSE 8080
+EXPOSE 1323
 
 # Command to run
 ENTRYPOINT ["/main"]
