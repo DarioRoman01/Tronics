@@ -10,7 +10,7 @@ services:
     depends_on:
       - mongo
     ports:
-      - "8080:8080"
+      - "1323:1323"
   mongo:
     image: mongo
     container_name: "tronics-db"
